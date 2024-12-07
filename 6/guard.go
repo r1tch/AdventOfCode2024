@@ -121,14 +121,18 @@ func main() {
 
 var effectiveObstacles int
 
-func testWithObstacle(gameMap [][]rune, guard point, direction point, obstacle point) {
-	//log.Println("testing", guard, direction)
-
+func cloneMap(gameMap [][]rune) [][]rune {
 	clonedMap := make([][]rune, len(gameMap))
 	for i := range gameMap {
 		clonedMap[i] = make([]rune, len(gameMap[i]))
 		copy(clonedMap[i], gameMap[i])
 	}
+
+	return clonedMap
+}
+
+func testWithObstacle(clonedMap [][]rune, guard point, direction point, obstacle point) {
+	//log.Println("testing", guard, direction)
 
 	clonedMap[obstacle.y][obstacle.x] = '#' // place obstacle
 
@@ -136,12 +140,15 @@ func testWithObstacle(gameMap [][]rune, guard point, direction point, obstacle p
 		//log.Println("obstacle added", obstacle)
 		effectiveObstacles++
 	}
+	clonedMap[obstacle.y][obstacle.x] = '.' // remove obstacle for new tests
 }
 
 func walker(gameMap [][]rune, guard point, direction point, placeObstacles bool) int {
 	loopDetector := NewLoopDetector()
 	visited := 1                    // the starting point
 	gameMap[guard.y][guard.x] = 'X' // mark the starting point
+	clonedMap := cloneMap(gameMap)
+
 	loopDetector.visit(NewPointDirection(guard, direction))
 	for {
 		// printMap(gameMap)
@@ -156,7 +163,7 @@ func walker(gameMap [][]rune, guard point, direction point, placeObstacles bool)
 			direction = point{-direction.y, direction.x}
 		case '.':
 			if (placeObstacles) {
-				testWithObstacle(gameMap, guard, direction, nextField)
+				testWithObstacle(clonedMap, guard, direction, nextField)
 			}
 			guard = nextField
 			if loopDetector.seen(NewPointDirection(guard, direction)) {
