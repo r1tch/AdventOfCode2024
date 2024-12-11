@@ -4,23 +4,32 @@ import (
 	"log"
 	"math"
 )
+type stones map[int]int
 
-type stones []int
+func (stones *stones) clone() stones {
+    cloned := make(map[int]int)
 
-func (stones *stones) add(stone int) {
-	if len(*stones) <= stone {
-		*stones = append(*stones, make([]int, stone-len(*stones)+1)...)
-	}
-	(*stones)[stone]++
+    for key, value := range *stones {
+        cloned[key] = value
+    }
+
+    return cloned
+}
+
+func NewStones() stones {
+	return make(map[int]int)
+}
+
+func (stones *stones) add(stone int, count int) {
+	(*stones)[stone] += count
 }
 
 func (stones *stones) remove(stone int) {
-	if len(*stones) <= stone {
-		log.Fatal("Removing non-existing stone", stone)
+	if _, exists := (*stones)[stone]; !exists {
+		log.Fatal("Removing non-existing stone ", stone)
 	}
 	(*stones)[stone]--
 }
-
 
 func (stones *stones) count() int {
 	sum := 0
@@ -31,26 +40,32 @@ func (stones *stones) count() int {
 	return sum
 }
 
-func (stones *stones) iterate() {
-	for num, count := range *stones {
+func iterate(stones stones) stones {
+	newStones := NewStones()
+
+	for num, count := range stones {
 		if count == 0 {
 			continue
 		} 
-		stones.remove(0)
 		if num == 0 {
-			stones.add(1)
+			newStones.add(1, count)
 		} else {
 			digits := int(math.Log10(float64(num))) + 1
 			if digits % 2 == 0 {
 				first := num / int(math.Pow10(digits/2))
 				second := num % int(math.Pow10(digits/2))
-				stones.add(first)
-				stones.add(second)				
+				newStones.add(first, count)
+				newStones.add(second, count)
 			} else {
-				stones.add(num * 2024)
+				newStones.add(num * 2024, count)
 			}
 		}
 	}
+	return newStones
+}
+
+func (stones *stones) print() {
+	log.Println(*stones)
 }
 
 // naive won't work with part 2, will be >16TB... 2,792,105,593,192 stones, each 8 bytes...
@@ -84,14 +99,16 @@ func main() {
 
 
 	var stones stones
-	//for _, v := range []int{9694820, 93, 54276, 1304, 314, 664481, 0, 4} {
-	for _, v := range []int{125,17} {
-		stones.add(v)
+	stones = make(map[int]int)
+	for _, v := range []int{9694820, 93, 54276, 1304, 314, 664481, 0, 4} {
+	//for _, v := range []int{125,17} {
+		stones.add(v, 1)
 	}
-	log.Println("added")
-	for i := 0; i < 25 ; i++ {
-		stones.iterate()
+	stones.print()
+	for i := 0; i < 75 ; i++ {
+		stones = iterate(stones)
 		log.Println("iter", i, "len", len(stones))
+		//stones.print()
 	}
 	log.Println(stones.count())
 }
