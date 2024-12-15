@@ -1,0 +1,103 @@
+1
+2
+3
+4
+ 1234567890
+
+
+ --'
+  '
+ -'
+
+
+task: find all solutions on one side
+
+22 67
+ 1 10  692
+
+combination of this must divide the number --> we have a solution
+
+a * b --> enough to check until this, others will be multiples
+
+goal: NUM = a*a_solution + b*b_solution
+
+a*(a_solution-X) + a*X + b*b_solution
+
+--> if X == b, then:
+a*(a_solution-b) + a*b + b*b_solution 
+a*(a_solution-b) + b*(b_solution+a)   --> we have smaller solution!!
+
+--> a_solution cannot be larger than b! (similarly, b_solution <= a)
+...otherwise we don't have a solution!
+
+!!! if we cannot solve one side --> unsolvable!
+
+?? if we have the first solution for a side, how do we get all other solutions?
+
+NEW IDEA:
+What if we have first two side solutions? --> then we can take their diff and continue the line!
+
+
+
+
+
+NUM = a*a_solution + b*b_solution
+NUM = a*(a_solution+X) + b*(b_solution-Y)
+a*(a_solution+X) = NUM - b*(b_solution-Y)
+
+     NUM - b*(b_solution-Y)
+X =  ----------------------  - a_solution
+               a
+
+
+     NUM - b*b_solution + b*Y
+X =  ------------------------  - a_solution
+               a
+
+...X will be integer if:
+    (NUM - b*b_solution) % a + b*Y % a == a
+
+...that is, we need to find all Y values where:
+    b*Y % a == a - (NUM - b*b_solution) % a
+(and Y < b_solution)
+
+...and then test these for the other side.
+
+
+
+
+
+When will a*a_solution be divisible by b?
+...when a_solution is divisible by b...
+
+a_solution == a * b + 1
+
+NUM == a*(a * b + 1) + x*b
+
+--> theory: we must have a solution smaller than a_solution too
+
+
+
+
+
+
+
+
+
+acount * axstep + bcount * bxstep = prizex
+acount * aystep + bcount * bystep = prizey
+
+acount * (axstep - aystep) + bcount * (bxstep - bystep) = prizex-prizey
+
+bcount * (bxstep - bystep) = prizex-prizey - acount * (axstep - aystep)
+
+         prizex-prizey - acount * (axstep - aystep)
+bcount = ------------------------------------------
+                     (bxstep - bystep)
+
+         prizex-prizey - bcount * (bxstep - bystep)
+acount = -------------------------------------------
+                    (axstep - aystep) 
+
+
+
