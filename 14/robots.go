@@ -103,7 +103,7 @@ func main() {
 		emptyfield[i] = '.'
 	}
 
-	for secs := 1; secs < 10000; secs++ {
+	for secs := 1; secs < 100000; secs++ {
 		field := make([]rune, WIDTH*HEIGHT)
 		copy(field, emptyfield)
 
@@ -114,8 +114,8 @@ func main() {
 		}
 		count := countGroups(field)
 		if count < 500 {
-			fmt.Println("RUN ", secs, countGroups(field))
-			printRobots(field)
+			fmt.Println("sec ", secs)
+			//printRobots(field)
 		}
 	}
 }
