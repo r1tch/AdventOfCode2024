@@ -128,17 +128,22 @@ func cloneMap(original map[point]bool) map[point]bool {
 	return clone
 }
 
-func (self *crawler) crawl(field field, costs map[point]int) ([]crawler, []crawler) {
+type pointDirection struct {
+	p point
+	d direction
+}
+
+func (self *crawler) crawl(field field, costs map[pointDirection]int) ([]crawler, []crawler) {
 
 	new := []crawler{}
 	arrived := []crawler{}
 
-	// here is the bug -- cost is calculated along with turning - while cost should be added AFTER having turned. But I got the solution, so no need to fix it.
-	if costs[self.pos] != 0 && costs[self.pos] < self.cost -1010{
+	if costs[pointDirection{self.pos, self.direction}] != 0 && costs[pointDirection{self.pos, self.direction}] < self.cost {
+		// log.Println("Cost of", self.pos, "is too high")
 		self.isDead = true
 		return new, arrived
 	}
-	costs[self.pos] = self.cost
+	costs[pointDirection{self.pos, self.direction}] = self.cost
 
 	//log.Println("Crawling from", self.pos, "in direction", self.direction)
 	if field.get(self.pos) == 'E' {
@@ -206,7 +211,7 @@ func main() {
 	visited := make(map[point]bool)
 	visited[start] = true
 	crawlers = append(crawlers, crawler{start, EAST, 0, false, visited})
-	costs := make(map[point]int)
+	costs := make(map[pointDirection]int)
 
 	for len(crawlers) != 0 {
 		log.Println("Crawlers: ", len(crawlers), " Arrived: ", len(arrived))
