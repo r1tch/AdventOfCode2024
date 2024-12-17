@@ -117,32 +117,39 @@ type crawler struct {
 	direction direction
 	cost      int
 	isDead    bool
-	visited   map[point]bool
+	visited   map[pointDirection]bool
 }
 
-func cloneMap(original map[point]bool) map[point]bool {
-	clone := make(map[point]bool)
+func cloneMap(original map[pointDirection]bool) map[pointDirection]bool {
+	clone := make(map[pointDirection]bool)
 	for key, value := range original {
 		clone[key] = value
 	}
 	return clone
 }
 
-func (self *crawler) crawl(field field, costs map[point]int) ([]crawler, []crawler) {
+type pointDirection struct {
+	p point
+	d direction
+}
+
+type pointDirectionMap map[pointDirection]bool
+
+func (self *crawler) crawl(field field, costs map[pointDirection]int) ([]crawler, []crawler) {
 
 	new := []crawler{}
 	arrived := []crawler{}
 
-	// here is the bug -- cost is calculated along with turning - while cost should be added AFTER having turned. But I got the solution, so no need to fix it.
-	if costs[self.pos] != 0 && costs[self.pos] < self.cost -1010{
+	if costs[pointDirection{self.pos, self.direction}] != 0 && costs[pointDirection{self.pos, self.direction}] < self.cost {
+		// log.Println("Cost of", self.pos, "is too high")
 		self.isDead = true
 		return new, arrived
 	}
-	costs[self.pos] = self.cost
+	costs[pointDirection{self.pos, self.direction}] = self.cost
 
-	//log.Println("Crawling from", self.pos, "in direction", self.direction)
+	// log.Println("Crawling from", self.pos, "in direction", self.direction)
 	if field.get(self.pos) == 'E' {
-		log.Println("Arrived at end", self.pos)
+		// log.Println("Arrived at end", self.pos)
 		arrived = append(arrived, *self)
 		self.isDead = true
 		return new, arrived
@@ -153,31 +160,31 @@ func (self *crawler) crawl(field field, costs map[point]int) ([]crawler, []crawl
 	// right non-wall: turn right: clone, move, +1000
 
 	leftPos := self.pos.add(self.direction.turnLeft())
-	if (field.get(leftPos) == 'E' || field.get(leftPos) == '.') && self.visited[leftPos] == false {
+	if (field.get(leftPos) == 'E' || field.get(leftPos) == '.') && self.visited[pointDirection{leftPos, self.direction.turnLeft()}] == false {
 		// log.Println("-left",  self.pos, "->", leftPos, "cost", self.cost)
 		v2 := cloneMap(self.visited)
-		v2[leftPos] = true
+		v2[pointDirection{leftPos, self.direction.turnLeft()}] = true
 		newborn := crawler{leftPos, self.direction.turnLeft(), self.cost + 1001, false, v2}
 		new = append(new, newborn)
 	}
 
 	rightPos := self.pos.add(self.direction.turnRight())
-	if (field.get(rightPos) == 'E' || field.get(rightPos) == '.') && self.visited[rightPos] == false {
+	if (field.get(rightPos) == 'E' || field.get(rightPos) == '.') && self.visited[pointDirection{rightPos, self.direction.turnRight()}] == false {
 		// log.Println("-right", self.pos, "->", rightPos, "cost", self.cost)
 		v2 := cloneMap(self.visited)
-		v2[rightPos] = true
+		v2[pointDirection{rightPos, self.direction.turnRight()}] = true
 		newborn := crawler{rightPos, self.direction.turnRight(), self.cost + 1001, false, v2}
 		new = append(new, newborn)
 	}
 
 	straightPos := self.pos.add(self.direction)
-	if (field.get(straightPos) == 'E' || field.get(straightPos) == '.') && self.visited[straightPos] == false {
-		//log.Println("-straight",  self.pos, "->", straightPos, "cost", self.cost)
+	if (field.get(straightPos) == 'E' || field.get(straightPos) == '.') && self.visited[pointDirection{straightPos, self.direction}] == false {
+		// log.Println("-straight",  self.pos, self.direction, "->", straightPos, "cost", self.cost)
 		self.pos = straightPos
 		self.cost++
-		self.visited[straightPos] = true
+		self.visited[pointDirection{straightPos, self.direction}] = true
 	} else {
-		// log.Println("-dead end",  self.pos, "->", straightPos)
+		// log.Println("-dead end",  self.pos, self.direction, "->", straightPos)
 		self.isDead = true
 	}
 
@@ -203,14 +210,14 @@ func main() {
 	crawlers := make([]crawler, 0)
 	arrived := make([]crawler, 0)
 	EAST := direction{1, 0}
-	visited := make(map[point]bool)
-	visited[start] = true
+	visited := make(map[pointDirection]bool)
+	visited[pointDirection{start, EAST}] = true
 	crawlers = append(crawlers, crawler{start, EAST, 0, false, visited})
-	costs := make(map[point]int)
+	costs := make(map[pointDirection]int)
 
 	for len(crawlers) != 0 {
 		log.Println("Crawlers: ", len(crawlers), " Arrived: ", len(arrived))
-		// printCrawlers(crawlers, field)
+	    // printCrawlers(crawlers, field)
 		newborn := make([]crawler, 0)
 
 		for i, crawler := range crawlers {
@@ -242,12 +249,12 @@ func main() {
 		}
 		log.Println("Minimum cost:", minCost, "of", len(arrived), "arrived crawlers")
 
-		visited := make(map[point]bool)
+		visited := make(map[pointDirection]bool)
 		for _, crawler := range arrived {
 			if crawler.cost == minCost {
-				for pos, _ := range crawler.visited {
-					visited[pos] = true
-					field.data[pos.pos(field.width)] = 'O'
+				for pd, _ := range crawler.visited {
+					visited[pd] = true
+					field.data[pd.p.pos(field.width)] = 'O'
 				}
 			}
 		}
