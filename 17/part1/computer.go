@@ -13,7 +13,7 @@ var A, B, C int
 
 func main() {
 	// Read the input from input.txt
-	data, err := ioutil.ReadFile("input.txt")
+	data, err := ioutil.ReadFile("input2.txt")
 	if err != nil {
 		fmt.Println("Error reading input file:", err)
 		return
@@ -38,8 +38,8 @@ func parseRegisters(aLine, bLine, cLine string) {
 
 func parseRegisterValue(line string) int {
 	parts := strings.Split(line, ": ")
-	value, _ := strconv.Atoi(parts[1])
-	return value
+	value, _ := strconv.ParseInt(parts[1], 10, 0)
+	return int(value)
 }
 
 // Parse the program as a slice of integers
@@ -61,6 +61,8 @@ func executeProgram(program []int) []string {
 		opcode := program[ip]
 		operand := program[ip+1]
 		ip += 2 // Default step unless overridden
+		fmt.Printf("o: %d %d A: 0%o B: 0%o C: 0%o\n", opcode, operand, A, B, C)
+		
 
 		switch opcode {
 		case 0: // adv: Divide A by 2^operand (combo)
@@ -76,7 +78,9 @@ func executeProgram(program []int) []string {
 		case 4: // bxc: B XOR C
 			B ^= C
 		case 5: // out: Output combo operand % 8
-			output = append(output, strconv.Itoa(getComboValue(operand)%8))
+			outChr := strconv.Itoa(getComboValue(operand) % 8)
+			output = append(output, outChr)
+			fmt.Println("Output:", outChr)
 		case 6: // bdv: Divide A by 2^operand, store in B
 			B = A / powerOfTwo(getComboValue(operand))
 		case 7: // cdv: Divide A by 2^operand, store in C
