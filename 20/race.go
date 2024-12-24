@@ -168,37 +168,84 @@ func getCheats(field field, minPicoSecs int) int {
 
 }
 
-func searchCheatFrom(field field, pos point, startPoint point, usedPicoSecs int, cheats map[startEnd]int, visited map[point]int) {
-	// log.Println("Searching from", pos, "to", startPoint, "used", usedPicoSecs)
-	if usedPicoSecs > 20 {
-		return
+type directionPair struct {
+	dir1 direction
+	dir2 direction
+}
+
+func (self direction) multiply(factor int) direction {
+	return direction{self.x * factor, self.y * factor}
+}
+
+func searchCheatFrom(field field, startPoint point, cheats map[startEnd]int) {
+	// finding L-shapes in each direction, using 20ps tops
+
+	directionPairs := []directionPair{
+		{direction{1, 0}, direction{0, 1}},
+		{direction{-1, 0}, direction{0, 1}},
+		{direction{1, 0}, direction{0, -1}},
+		{direction{-1, 0}, direction{0, -1}},
 	}
-	if posVal, exists := visited[pos]; exists && posVal <= usedPicoSecs {
-		// log.Println("Already visited", pos, "in", visited[pos], "picoSecs")
-		return
-	}
-	// if pos.x <= 0 || pos.x >= field.width-1 || pos.y <= 0 || pos.y >= field.height-1 {  // don't allow going in outer walls
-	// 	return
-	// }
-	visited[pos] = usedPicoSecs
-	
-	
-	for _, dir := range directions {
-		newPos := pos.add(dir)
-		if newPos.x < 0 || newPos.x >= field.width || newPos.y < 0 || newPos.y >= field.height {
-			continue
-		}
-		if field.get(newPos) == '#' {
-			searchCheatFrom(field, newPos, startPoint, usedPicoSecs+1, cheats, visited)
-		} else if usedPicoSecs > 0 && field.picoSecs[newPos.pos(field.width)] > 0 {
-			startPicoSecs := field.picoSecs[startPoint.pos(field.width)]
-			saved := field.picoSecs[newPos.pos(field.width)] - startPicoSecs - usedPicoSecs
-			if saved > cheats[startEnd{startPoint, newPos}] {
-				cheats[startEnd{startPoint, newPos}] = saved
-				log.Println("Found cheat at", startPoint, "to", newPos, "saved", saved, "picoSecs")
+
+	startPicoSecs := field.picoSecs[startPoint.pos(field.width)]
+
+	for _, directionPair := range directionPairs {
+		// below we do all combinations of the two directions
+		for firstCount := 0; firstCount <= 20; firstCount++ {
+
+			newPos := startPoint
+			for i := 0; i < 20; i++ {
+				if i < firstCount {
+					newPos = newPos.add(directionPair.dir1)
+				} else {
+					newPos = newPos.add(directionPair.dir2)
+				}
+				if newPos.x < 0 || newPos.x >= field.width || newPos.y < 0 || newPos.y >= field.height {
+					break
+				}
+				if field.picoSecs[newPos.pos(field.width)] < 0 {
+					continue
+				}
+				saved := field.picoSecs[newPos.pos(field.width)] - startPicoSecs - i - 1
+				if saved > cheats[startEnd{startPoint, newPos}] {
+					cheats[startEnd{startPoint, newPos}] = saved
+					log.Println("Found cheat at", startPoint, "to", newPos, "saved", saved, "picoSecs")
+				}
 			}
 		}
 	}
+
+
+	// // log.Println("Searching from", pos, "to", startPoint, "used", usedPicoSecs)
+	// if usedPicoSecs > 20 {
+	// 	return
+	// }
+	// if posVal, exists := visited[pos]; exists && posVal <= usedPicoSecs {
+	// 	// log.Println("Already visited", pos, "in", visited[pos], "picoSecs")
+	// 	return
+	// }
+	// // if pos.x <= 0 || pos.x >= field.width-1 || pos.y <= 0 || pos.y >= field.height-1 {  // don't allow going in outer walls
+	// // 	return
+	// // }
+	// visited[pos] = usedPicoSecs
+
+
+	// for _, dir := range directions {
+	// 	newPos := pos.add(dir)
+	// 	if newPos.x < 0 || newPos.x >= field.width || newPos.y < 0 || newPos.y >= field.height {
+	// 		continue
+	// 	}
+	// 	if field.get(newPos) == '#' {
+	// 		searchCheatFrom(field, newPos, startPoint, usedPicoSecs+1, cheats, visited)
+	// 	} else if usedPicoSecs > 0 && field.picoSecs[newPos.pos(field.width)] > 0 {
+	// 		startPicoSecs := field.picoSecs[startPoint.pos(field.width)]
+	// 		saved := field.picoSecs[newPos.pos(field.width)] - startPicoSecs - usedPicoSecs
+	// 		if saved > cheats[startEnd{startPoint, newPos}] {
+	// 			cheats[startEnd{startPoint, newPos}] = saved
+	// 			log.Println("Found cheat at", startPoint, "to", newPos, "saved", saved, "picoSecs")
+	// 		}
+	// 	}
+	// }
 }
 
 const INT_MAX = int(^uint(0) >> 1)
@@ -206,14 +253,13 @@ const INT_MAX = int(^uint(0) >> 1)
 func get20PsCheats(field field, minPicoSecs int) int {
 	// go into all directions --> bfs in the walls until cheat found or 20ps reached
 	cheats := make(map[startEnd]int)
-	
+
 	for idx, pico := range field.picoSecs {
 		if pico < 0 {
 			continue
 		}
 		startPoint := posToPoint(idx, field.width)
-		visited := make(map[point]int)
-		searchCheatFrom(field, startPoint, startPoint, 0, cheats, visited)
+		searchCheatFrom(field, startPoint, cheats)
 	}
 
 	numCheats := 0
@@ -243,10 +289,10 @@ func get20PsCheats(field field, minPicoSecs int) int {
 }
 
 func main() {
-	field, start, end := readMap("input2.txt")
+	field, start, end := readMap("input.txt")
 	log.Println(start, end)
 	recordPath(field, start, end)
 	printMap(field)
 	log.Println("Part 1:", getCheats(field, 100))
-	log.Println("Part 2:", get20PsCheats(field, 50))
+	log.Println("Part 2:", get20PsCheats(field, 100))
 }
