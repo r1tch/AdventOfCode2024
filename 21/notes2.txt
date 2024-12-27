@@ -1,0 +1,90 @@
+Next idea:
+  - we have optimized paths
+  - we cannot calculate / store paths (4M*2^11)
+  - instead: recursive fn calls, cache the results (fromTo, levelsDone)
+
+
+
+<vA<AA>>^AvA<^A>AvA^Av<<A>A>^AvA<^A>Av<<A>>^AAAvA^A<vA>^Av<<A>>^AAAvA<^A>A
+  v <<   A >  ^ A > A   < v  A >  ^ A   <   AAA > A  v  A   <   AAA >  ^ A
+         <      ^   A        v      A       ^^^   A     >       vvv      A
+
+<vA<AA>>^AvA<^A>AvA^Av<<A>A>^AvA<^A>Av<<A>>^AAAvA^Av<<A>A>^AAAvA^A<A>A
+  v <<   A >  ^ A > A   < v  A >  ^ A   <   AAA > A   < v  AAA > A ^ A
+         <      ^   A        v      A       ^^^   A        vvv   >   A
+                    2               0             8                  A
+
+ ^A
+<v>
+
+
+8 -> A keypad mozgásnál, vvv> miért jobb mint >vvv ??
+
+1) vvv>A
+A->v <vA, ehhez v<<A>A>^A
+v->> >A,  ehhez vA^A
+>->A ^A,  ehhez <A>A
+
+2) >vvvA
+A->> vA,  ehhez v<A>^A
+>->v <A,  ehhez v<<A>>^A
+v->A >^A, ehhez vA<^A>A
+
+ÖTLET: keypad-hez is legenerálni a level 2 kódokat --> hátha jobb?
+--> sejtés: 2 szint után látszik a különbség már...?
+  Ötlet 2: 2 szintre előre kódolni, prune-olni utána... így is túl sok?
+
+Ötlet 3:
+  - minden x->y váltáshoz legenerálni level0, 1, 2, 3 minimál-megoldásokat
+    - megnézni level 3 különbözhet-e? ha nem, tudjuk, hogy level 2 elég.
+    - kell-e? vagy próbáljuk a fentit?
+
+
+
++---+---+---+      +---+---+
+| 7 | 8 | 9 |      | ^ | A |
++---+---+---+  +---+---+---+
+| 4 | 5 | 6 |  | < | v | > |
++---+---+---+  +---+---+---+
+| 1 | 2 | 3 |
++---+---+---+
+    | 0 | A |
+    +---+---+
+
+
+v<<A>>^A<vA<A>>^AvAA^<A>Av<A<A>>^A<Av>A^Av<<A>>^AAAvA^A<vA<A>>^AAAvA^A<A>A
+v<<A>>^A<vA<A>>^AvAA^<A>Av<A<A>>^A<Av>A^Av<<A>>^AAAvA^Av<A<A>>^AAAvA^A<A>A
+
+
+2024/12/27 02:15:57 Solving  129A  ( 129 )
+2024/12/27 02:15:57 ------------ Level 0 ------------
+2024/12/27 02:15:57 level 0 outputPath len 14 1
+2024/12/27 02:15:57 ------------ Level 1 ------------
+2024/12/27 02:15:57 level 1 outputPath len 30 1
+2024/12/27 02:15:57 ------------ Level 2 ------------
+2024/12/27 02:15:57 level 2 outputPath len 74 1
+2024/12/27 02:15:57 ------------ Level 3 ------------
+2024/12/27 02:15:57 level 3 outputPath len 182 1
+2024/12/27 02:15:57 ------------ Level 4 ------------
+2024/12/27 02:15:57 level 4 outputPath len 450 1
+2024/12/27 02:15:57 ------------ Level 5 ------------
+2024/12/27 02:15:57 level 5 outputPath len 1124 1
+2024/12/27 02:15:57 ------------ Level 6 ------------
+2024/12/27 02:15:57 level 6 outputPath len 2806 1
+2024/12/27 02:15:57 ------------ Level 7 ------------
+2024/12/27 02:15:57 level 7 outputPath len 7024 1
+2024/12/27 02:15:57 ------------ Level 8 ------------
+2024/12/27 02:15:57 level 8 outputPath len 17574 1
+2024/12/27 02:15:57 ------------ Level 9 ------------
+2024/12/27 02:15:57 level 9 outputPath len 43992 1
+2024/12/27 02:15:57 ------------ Level 10 ------------
+2024/12/27 02:15:58 level 10 outputPath len 110112 1
+2024/12/27 02:15:58 ------------ Level 11 ------------
+2024/12/27 02:16:00 level 11 outputPath len 275632 1
+2024/12/27 02:16:00 ------------ Level 12 ------------
+2024/12/27 02:16:10 level 12 outputPath len 689950 1
+2024/12/27 02:16:10 ------------ Level 13 ------------
+2024/12/27 02:17:25 level 13 outputPath len 1727080 1
+2024/12/27 02:17:25 ------------ Level 14 ------------
+2024/12/27 02:26:21 level 14 outputPath len 4323192 1
+2024/12/27 02:26:21 ------------ Level 15 ------------
