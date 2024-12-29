@@ -350,6 +350,27 @@ func optimizeShortestPaths(pathMap map[fromTo][]string) map[fromTo][]string {
 				// shortestLength := calculateMinLength(shortestPathsPerChar)
 				// log.Println("Shortest paths for (", task, dirpadPath1, ")", dirpadPath2, ":", shortestPathsPerChar, shortestLength)
 
+				/*
+				for _, dirpadPath3 := range shortestDirpadPaths2 {
+						shortestPathsPerChar = make([][]string, 0)
+						prevChar = 'A'
+						for _, char := range dirpadPath3 {
+							shortestPathsPerChar = append(shortestPathsPerChar, shortestDirpadPaths[fromTo{prevChar, char}])
+							prevChar = char
+						}
+						shortestLength := calculateMinLength(shortestPathsPerChar)
+	
+						if shortestLength < minLength {
+							minLength = shortestLength
+							optimizedPathMap[fromToChr] = []string{dirpadPath1}
+							va := fromTo{'v', 'A'}
+							if fromToChr == va {
+								log.Println("vA:", dirpadPath3, shortestLength)
+							}
+						}
+	
+				}
+				*/
 				for _, dirpadPath3 := range shortestDirpadPaths2 {
 					shortestPathsPerChar = make([][]string, 0)
 					prevChar = 'A'
@@ -370,6 +391,11 @@ func optimizeShortestPaths(pathMap map[fromTo][]string) map[fromTo][]string {
 						if shortestLength < minLength {
 							minLength = shortestLength
 							optimizedPathMap[fromToChr] = []string{dirpadPath1}
+							va := fromTo{'v', 'A'}
+							if fromToChr == va {
+								shortestDirpadPaths4 := permutatePaths(shortestPathsPerChar)
+								log.Println("vA:", dirpadPath4, shortestLength, shortestDirpadPaths4)
+							}
 						}
 	
 					}

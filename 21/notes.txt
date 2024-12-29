@@ -18,3 +18,21 @@ v<<A >>^A <A >A <A A >vA ^A <vA A A >^A
 "<vA","<A","A",">>^A","vA","A","<^A",">A","<v<A",">>^A","vA","^A","<v<A",">>^A","A","vA","<A",">^A","<A",">A","<v<A",">A",">^A","A","A","vA","<^A",">A"
 
 [][]string{[]string{"<vA", "v<A"}, []string{"<A"}, []string{"A"}, []string{">>^A", ">^>A"}, []string{"vA"}, []string{"A"}, []string{"<^A", "^<A"}, []string{">A"}, []string{"<v<A", "v<<A"}, []string{">>^A", ">^>A"}, []string{"vA"}, []string{"^A"}, []string{"<v<A", "v<<A"}, []string{">>^A", ">^>A"}, []string{"A"}, []string{"vA"}, []string{"<A"}, []string{">^A", "^>A"}, []string{"<A"}, []string{">A"}, []string{"<v<A", "v<<A"}, []string{">A"}, []string{">^A", "^>A"}, []string{"A"}, []string{"A"}, []string{"vA"}, []string{"<^A", "^<A"}, []string{">A"}}
+
+
+difference of encoding eg vA:
+
+1) using: >^A costs 123 on l4:
+l0:                     >                             ^             A   3
+l1:           v         A             <         ^     A       >     A   7
+l2:    <  v   A  >   ^  A   v  < <    A  >   ^  A  >  A   v   A  ^  A  19
+l3: v<<A >A >^A vA <^A >A v<A <A A >>^A vA <^A >A vA ^A <vA >^A <A >A  47
+l4: <vA<AA>>^AvA^AvA<^A>A<vA>^Av<<A>^A>AvA^Av<<A>A>^Av<<A>>^AAvAA<^A>A<vA>^Av<<A>^A>AvA^A<vA>^A<A>Av<<A>A>^AvA<^A>Av<<A>>^AvA^A  123
+
+2) using: ^>A costs 117 on l4:
+l0:                          ^                       <               A   3
+l1:              <           A           v     >     A         ^     A   7
+l2:    v  < <    A  > >   ^  A   v  <    A  >  A  ^  A    <    A  >  A  19
+l3:  v<A <A A >>^A vA A ^<A >A v<A <A >>^A vA ^A <A >A v<<A >>^A vA ^A  47
+l4: v<<A>A>^Av<<A>>^AAvAA<^A>A<vA>^AAv<<A>^A>AvA^A<vA<AA>>^AvA^AvA<^A>A<vA>^A<A>Av<<A>>^AvA^A<vA<AA>>^AvAA<^A>A<vA>^A<A>A  117
+
